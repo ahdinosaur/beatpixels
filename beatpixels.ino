@@ -1,5 +1,6 @@
-#include <FastSPI_LED2.h>
+#include <math.h>
 
+#include <FastSPI_LED2.h>
 #include <OSCBundle.h>
 #include <OSCBoards.h>
 
@@ -23,12 +24,12 @@ OSCBundle bundleOUT;
 /* strip definition */
 typedef struct {
   int start;
-  int end;
+  int length;
 } Strip;
 
 Strip strips [2] = {
-  { 0, 15 },
-  { 16, 31 }
+  { 0, 16 },
+  { 16, 16 }
 };
 
 /* RGB utilities */
@@ -41,11 +42,11 @@ typedef struct {
 /* set RGB colors */
 void setRGB(int stripNum, CRGBS &colors)
 {
-  int pxStart = strips[stripNum].start;
-  int pxEnd = strips[stripNum].end;
-  for (int px = pxStart; px < pxEnd; px++)
+  int stripStart = strips[stripNum].start;
+  int stripLength = strips[stripNum].length;
+  int stripEnd = stripStart + stripLength;
+  for (int px = stripStart; px < stripEnd; px++)
   {
-    CRGB color = colors.vals[px % colors.len];
     leds[px] = colors.vals[px % colors.len];
   }
 }
@@ -81,12 +82,32 @@ void setHSV(int stripNum, CHSV color[])
 
 /* various led dispatches */
 
-void dispatchRainbow(OSCMessage &msg)
+void setRainbow(int stripNum, OSCMessage &msg)
 {
-  static uint8_t startingHue = 0;
-  startingHue -= 1;
-  fill_rainbow(leds, NUM_LEDS, startingHue);
-  bundleOUT.add("/leds/rainbow");
+  // default HSV
+  double hue = 0;
+  int sat = 255;
+  int val = 255;
+
+  int msgSize = msg.size();
+  switch (msgSize) {
+    case 3:
+      val = msg.getInt(2);
+    case 2:
+      sat = msg.getInt(1);
+    case 1:
+      hue = msg.getInt(0); break;
+  } 
+  
+  int stripStart = strips[stripNum].start;
+  int stripLength = strips[stripNum].length;
+  int stripEnd = stripStart + stripLength;
+  double hueStep = 255.0 / stripLength;
+  for (int px = stripStart; px < stripEnd; px++)
+  {
+    leds[px] = CHSV(round(hue), sat, val);
+    hue += hueStep;
+  }
 }
       
 /* main controller for led routes 
@@ -138,7 +159,8 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       setRGB(stripNum, colors);
       free(colors.vals);
     } else if (msg.fullMatch("/rainbow", offset)) {
-      msg.dispatch("/rainbow", dispatchRainbow, offset);
+      setRainbow(stripNum, msg);
+      bundleOUT.add("/leds/rainbow");
     } else if (msg.fullMatch("/red", offset)) {
       CRGB vals [] = { CRGB::Red };
       CRGBS colors = { vals, 1 };
@@ -155,6 +177,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       setRGB(stripNum, colors);
       bundleOUT.add("/blue");
     }
+    return;
   }
 
 }
