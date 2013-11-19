@@ -1,4 +1,4 @@
-#N canvas 356 262 693 413 10;
+#N canvas 440 227 693 413 10;
 #X declare -lib mrpeach;
 #X declare -lib mrpeach;
 #X obj 234 148 packOSC;
@@ -17,8 +17,12 @@
 #X msg 48 62 /leds/strip/0/all/red;
 #X msg 48 86 /leds/strip/0/all/green;
 #X msg 49 115 /leds/strip/1/all/blue;
-#X msg 332 30 /leds/strip/0/all/rgb 255 0 0 0 255 0 0 0 255;
-#X msg 212 26 /leds/strip/1/all/rainbow;
+#X msg 393 12 /leds/strip/0/all/rgb 255 0 0 0 255 0 0 0 255;
+#X obj 296 -76 until;
+#X obj 336 -51 + 1;
+#X msg 296 -23 /leds/strip/1/all/rainbow \$1;
+#X obj 297 -51 int;
+#X msg 296 -101 255;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 4 0;
@@ -35,4 +39,9 @@
 #X connect 14 0 5 0;
 #X connect 15 0 5 0;
 #X connect 16 0 5 0;
-#X connect 17 0 5 0;
+#X connect 17 0 20 0;
+#X connect 18 0 20 1;
+#X connect 19 0 5 0;
+#X connect 20 0 18 0;
+#X connect 20 0 19 0;
+#X connect 21 0 17 0;

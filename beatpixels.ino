@@ -84,6 +84,7 @@ void setHSV(int stripNum, CHSV color[])
 
 void setRainbow(int stripNum, OSCMessage &msg)
 {
+  
   // default HSV
   double hue = 0;
   int sat = 255;
@@ -96,8 +97,10 @@ void setRainbow(int stripNum, OSCMessage &msg)
     case 2:
       sat = msg.getInt(1);
     case 1:
-      hue = msg.getInt(0); break;
+      hue = fmod(msg.getInt(0), 255); break;
   } 
+  
+  bundleOUT.add("/leds/rainbow").add(hue).add(sat).add(val);
   
   int stripStart = strips[stripNum].start;
   int stripLength = strips[stripNum].length;
@@ -106,7 +109,7 @@ void setRainbow(int stripNum, OSCMessage &msg)
   for (int px = stripStart; px < stripEnd; px++)
   {
     leds[px] = CHSV(round(hue), sat, val);
-    hue += hueStep;
+    hue = fmod(hue + hueStep, 255);
   }
 }
       
@@ -160,7 +163,6 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       free(colors.vals);
     } else if (msg.fullMatch("/rainbow", offset)) {
       setRainbow(stripNum, msg);
-      bundleOUT.add("/leds/rainbow");
     } else if (msg.fullMatch("/red", offset)) {
       CRGB vals [] = { CRGB::Red };
       CRGBS colors = { vals, 1 };
@@ -195,7 +197,7 @@ void setup() {
   
   // set serial configuration
   // use baud rate as high as you can reliably run on your platform
-  SLIPSerial.begin(9600);
+  SLIPSerial.begin(115200);
 #if ARDUINO >= 100
   while(!Serial)
     ;   // Leonardo bug
