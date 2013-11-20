@@ -75,9 +75,47 @@ void getRGB(OSCMessage &msg, CRGBS &colors)
   colors.vals = vals;
 }
 
-void setHSV(int stripNum, CHSV color[])
+/* HSV utilities */
+
+typedef struct {
+  CHSV * vals;
+  int len;
+} CHSVS;
+
+/* set HSV colors */
+void setHSV(int stripNum, CHSVS &colors)
 {
-  
+  int stripStart = strips[stripNum].start;
+  int stripLength = strips[stripNum].length;
+  int stripEnd = stripStart + stripLength;
+  for (int px = stripStart; px < stripEnd; px++)
+  {
+    leds[px] = colors.vals[px % colors.len];
+  }
+}
+
+void getHSV(OSCMessage &msg, CHSVS &colors)
+{
+  /* get hsv colors */
+  int msgSize = msg.size();
+  if (msgSize && ((msgSize % 3) != 0))
+  {
+    bundleOUT.add("/error/num/hsv/colors");
+    return;
+  }
+  int numColors = msgSize / 3;
+  bundleOUT.add("/numColors").add(numColors);
+  CHSV * vals = (CHSV *) malloc(numColors * sizeof(CHSV));
+  for (int i = 0; i < numColors; i++)
+  {
+    int hue = msg.getInt(i * 3);
+    int sat = msg.getInt(i * 3 + 1);
+    int val = msg.getInt(i * 3 + 2);
+    bundleOUT.add("/hsv").add(hue).add(sat).add(val);
+    vals[i] = CHSV(hue, sat, val);
+  }
+  colors.len = numColors;
+  colors.vals = vals;
 }
 
 /* various led dispatches */
@@ -161,19 +199,34 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       getRGB(msg, colors);
       setRGB(stripNum, colors);
       free(colors.vals);
-    } else if (msg.fullMatch("/rainbow", offset)) {
+    }
+    else if (msg.fullMatch("/hsv", offset))
+    { 
+      CHSVS colors;
+      getHSV(msg, colors);
+      setHSV(stripNum, colors);
+      free(colors.vals);
+    }
+    else if (msg.fullMatch("/rainbow", offset))
+    {
       setRainbow(stripNum, msg);
-    } else if (msg.fullMatch("/red", offset)) {
+    }
+    else if (msg.fullMatch("/red", offset))
+    {
       CRGB vals [] = { CRGB::Red };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
       bundleOUT.add("/red");
-    } else if (msg.fullMatch("/green", offset)) {
+    }
+    else if (msg.fullMatch("/green", offset))
+    {
       CRGB vals [] = { CRGB::Green };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
       bundleOUT.add("/green");
-    } else if (msg.fullMatch("/blue", offset)) {
+    }
+    else if (msg.fullMatch("/blue", offset))
+    {
       CRGB vals [] = { CRGB::Blue };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
