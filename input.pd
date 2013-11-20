@@ -1,15 +1,16 @@
-#N canvas 427 310 850 410 10;
-#X floatatom 89 210 5 0 0 0 - - -;
-#X obj 91 171 env~;
+#N canvas 453 303 850 410 10;
+#X floatatom 88 276 5 0 0 0 - - -;
+#X obj 90 237 env~;
 #X obj 92 119 readsf~;
 #X msg -113 91 open ~/Downloads/Taiko1.wav;
 #X msg 109 70 start;
 #X msg 170 69 stop;
-#X obj 129 212 dac~;
+#X obj 128 278 dac~;
 #X msg -112 63 open ~/Downloads/Taiko2.wav;
 #X msg -112 34 open ~/Downloads/Taiko3.wav;
-#X obj 25 173 outlet~;
+#X obj 24 239 outlet~;
 #X msg -21 -2 open ~/Downloads/sampledrumkit/Kick.wav;
+#X obj 213 124 adc~;
 #X connect 1 0 0 0;
 #X connect 2 0 1 0;
 #X connect 2 0 6 0;
@@ -20,3 +21,6 @@
 #X connect 7 0 2 0;
 #X connect 8 0 2 0;
 #X connect 10 0 2 0;
+#X connect 11 0 9 0;
+#X connect 11 0 1 0;
+#X connect 11 0 6 0;

@@ -1,10 +1,10 @@
-#N canvas 537 256 693 413 10;
+#N canvas 535 254 693 413 10;
 #X declare -lib mrpeach;
 #X declare -lib mrpeach;
 #X obj 234 148 packOSC;
 #X obj 259 205 o.io.slipserial;
 #X obj 266 250 unpackOSC;
-#X obj 389 139 import mrpeach;
+#X obj 488 164 import mrpeach;
 #X obj 293 297 print;
 #X obj 207 85 trigger b a b;
 #X msg 206 114 ];
@@ -22,7 +22,7 @@
 #X msg 296 -23 /leds/strip/1/all/rainbow \$1;
 #X obj 297 -51 int;
 #X msg 296 -101 255;
-#X obj 122 -90 inlet;
+#X obj 340 118 inlet;
 #X msg 76 19 /leds/strip/0/all/hsv 0 255 255;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
@@ -45,5 +45,5 @@
 #X connect 19 0 17 0;
 #X connect 19 0 18 0;
 #X connect 20 0 16 0;
-#X connect 21 0 5 0;
+#X connect 21 0 0 0;
 #X connect 22 0 5 0;
