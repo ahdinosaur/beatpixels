@@ -41,10 +41,9 @@ typedef struct {
 /* set RGB colors */
 void setRGB(int stripNum, CRGBS &colors)
 {
-  int stripStart = strips[stripNum].start;
-  int stripLength = strips[stripNum].length;
-  int stripEnd = stripStart + stripLength;
-  for (int px = stripStart; px < stripEnd; px++)
+  for (int px = strips[stripNum].start;
+       px < (strips[stripNum].start + strips[stripNum].length);
+       px++)
   {
     leds[px] = colors.vals[px % colors.len];
   }
@@ -59,18 +58,20 @@ void getRGB(OSCMessage &msg, CRGBS &colors)
     //bundleOUT.add("/error/num/rgb/colors");
     return;
   }
-  int numColors = msgSize / 3;
-  //bundleOUT.add("/numColors").add(numColors);
-  CRGB * vals = (CRGB *) malloc(numColors * sizeof(CRGB));
-  for (int i = 0; i < numColors; i++)
+  colors.len = msgSize / 3;
+  //bundleOUT.add("/numColors").add(colors.len);
+  CRGB * vals = (CRGB *) malloc(colors.len * sizeof(CRGB));
+  for (int i = 0; i < colors.len; i++)
   {
-    int red = msg.getInt(i * 3);
-    int green = msg.getInt(i * 3 + 1);
-    int blue = msg.getInt(i * 3 + 2);
+    //int red = msg.getInt(i * 3);
+    //int green = msg.getInt(i * 3 + 1);
+    //int blue = msg.getInt(i * 3 + 2);
     //bundleOUT.add("/rgb").add(red).add(green).add(blue);
-    vals[i] = CRGB(red, green, blue);
+    //vals[i] = CHSV(red, green, blue);
+    vals[i] = CRGB(msg.getInt(i * 3),
+                   msg.getInt(i * 3 + 1),
+                   msg.getInt(i * 3 + 2));
   }
-  colors.len = numColors;
   colors.vals = vals;
 }
 
@@ -84,10 +85,9 @@ typedef struct {
 /* set HSV colors */
 void setHSV(int stripNum, CHSVS &colors)
 {
-  int stripStart = strips[stripNum].start;
-  int stripLength = strips[stripNum].length;
-  int stripEnd = stripStart + stripLength;
-  for (int px = stripStart; px < stripEnd; px++)
+  for (int px = strips[stripNum].start;
+       px < (strips[stripNum].start + strips[stripNum].length);
+       px++)
   {
     leds[px] = colors.vals[px % colors.len];
   }
@@ -102,18 +102,20 @@ void getHSV(OSCMessage &msg, CHSVS &colors)
     //bundleOUT.add("/error/num/hsv/colors");
     return;
   }
-  int numColors = msgSize / 3;
-  //bundleOUT.add("/numColors").add(numColors);
-  CHSV * vals = (CHSV *) malloc(numColors * sizeof(CHSV));
-  for (int i = 0; i < numColors; i++)
+  colors.len = msgSize / 3;
+  //bundleOUT.add("/numColors").add(colors.len);
+  CHSV * vals = (CHSV *) malloc(colors.len * sizeof(CHSV));
+  for (int i = 0; i < colors.len; i++)
   {
-    int hue = msg.getInt(i * 3);
-    int sat = msg.getInt(i * 3 + 1);
-    int val = msg.getInt(i * 3 + 2);
+    //int hue = msg.getInt(i * 3);
+    //int sat = msg.getInt(i * 3 + 1);
+    //int val = msg.getInt(i * 3 + 2);
     //bundleOUT.add("/hsv").add(hue).add(sat).add(val);
-    vals[i] = CHSV(hue, sat, val);
+    //vals[i] = CHSV(hue, sat, val);
+    vals[i] = CHSV(msg.getInt(i * 3),
+                   msg.getInt(i * 3 + 1),
+                   msg.getInt(i * 3 + 2));
   }
-  colors.len = numColors;
   colors.vals = vals;
 }
 
