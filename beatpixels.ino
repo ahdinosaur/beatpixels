@@ -57,18 +57,18 @@ void getRGB(OSCMessage &msg, CRGBS &colors)
   int msgSize = msg.size();
   if (msgSize && ((msgSize % 3) != 0))
   {
-    bundleOUT.add("/error/num/rgb/colors");
+    //bundleOUT.add("/error/num/rgb/colors");
     return;
   }
   int numColors = msgSize / 3;
-  bundleOUT.add("/numColors").add(numColors);
+  //bundleOUT.add("/numColors").add(numColors);
   CRGB * vals = (CRGB *) malloc(numColors * sizeof(CRGB));
   for (int i = 0; i < numColors; i++)
   {
     int red = msg.getInt(i * 3);
     int green = msg.getInt(i * 3 + 1);
     int blue = msg.getInt(i * 3 + 2);
-    bundleOUT.add("/rgb").add(red).add(green).add(blue);
+    //bundleOUT.add("/rgb").add(red).add(green).add(blue);
     vals[i] = CRGB(red, green, blue);
   }
   colors.len = numColors;
@@ -100,18 +100,18 @@ void getHSV(OSCMessage &msg, CHSVS &colors)
   int msgSize = msg.size();
   if (msgSize && ((msgSize % 3) != 0))
   {
-    bundleOUT.add("/error/num/hsv/colors");
+    //bundleOUT.add("/error/num/hsv/colors");
     return;
   }
   int numColors = msgSize / 3;
-  bundleOUT.add("/numColors").add(numColors);
+  //bundleOUT.add("/numColors").add(numColors);
   CHSV * vals = (CHSV *) malloc(numColors * sizeof(CHSV));
   for (int i = 0; i < numColors; i++)
   {
     int hue = msg.getInt(i * 3);
     int sat = msg.getInt(i * 3 + 1);
     int val = msg.getInt(i * 3 + 2);
-    bundleOUT.add("/hsv").add(hue).add(sat).add(val);
+    //bundleOUT.add("/hsv").add(hue).add(sat).add(val);
     vals[i] = CHSV(hue, sat, val);
   }
   colors.len = numColors;
@@ -138,7 +138,7 @@ void setRainbow(int stripNum, OSCMessage &msg)
       hue = fmod(msg.getInt(0), 255); break;
   } 
   
-  bundleOUT.add("/leds/rainbow").add(hue).add(sat).add(val);
+  //bundleOUT.add("/leds/rainbow").add(hue).add(sat).add(val);
   
   int stripStart = strips[stripNum].start;
   int stripLength = strips[stripNum].length;
@@ -169,7 +169,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
 {
   char address [30];
   int addressLen = msg.getAddress(address, ledsOffset);
-  bundleOUT.add("/leds").add(address).add(addressLen);
+  //bundleOUT.add("/leds").add(address).add(addressLen);
   
   /* get strip number */
   int startStrip = msg.match("/strip", ledsOffset);
@@ -182,7 +182,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
   
   int stripNum = atoi(stripChars);
   
-  bundleOUT.add("/strip").add(stripNum);
+  //bundleOUT.add("/strip").add(stripNum);
   
   /* get whether all, range, or single pixels */
   
@@ -195,14 +195,18 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
     
     if (msg.fullMatch("/rgb", offset))
     { 
-      CRGBS colors;
+      CRGBS colors = { NULL, 0 };
       getRGB(msg, colors);
       setRGB(stripNum, colors);
       free(colors.vals);
     }
     else if (msg.fullMatch("/hsv", offset))
-    { 
-      CHSVS colors;
+    {
+      // WTF!?!?!?
+      if (msg.getInt(2) == 9058) {
+        return;
+      }
+      CHSVS colors = { NULL, 0 };
       getHSV(msg, colors);
       setHSV(stripNum, colors);
       free(colors.vals);
@@ -216,21 +220,21 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       CRGB vals [] = { CRGB::Red };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
-      bundleOUT.add("/red");
+      //bundleOUT.add("/red");
     }
     else if (msg.fullMatch("/green", offset))
     {
       CRGB vals [] = { CRGB::Green };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
-      bundleOUT.add("/green");
+      //bundleOUT.add("/green");
     }
     else if (msg.fullMatch("/blue", offset))
     {
       CRGB vals [] = { CRGB::Blue };
       CRGBS colors = { vals, 1 };
       setRGB(stripNum, colors);
-      bundleOUT.add("/blue");
+      //bundleOUT.add("/blue");
     }
     return;
   }
@@ -272,7 +276,7 @@ void loop() {
   }
 
   if(!bundleIN.hasError()) {
-    bundleOUT.add("/noerror/size").add(bundleIN.size());
+    //bundleOUT.add("/noerror/size").add(bundleIN.size());
     if (bundleIN.size() > 0) {
       bundleIN.route("/leds", routeLeds);
       LEDS.show();
