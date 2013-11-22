@@ -1,4 +1,4 @@
-#N canvas 478 268 450 300 10;
+#N canvas 476 266 450 300 10;
 #X declare -lib mrpeach;
 #X obj 51 131 comport;
 #X obj 251 231 import mrpeach;
@@ -12,6 +12,7 @@
 #X obj 261 46 inlet;
 #X msg 169 103 devicename /dev/ttyACM0 \, pollintervall 1;
 #X msg 296 142 baud 115200;
+#X obj 335 23 inlet;
 #X connect 0 0 2 0;
 #X connect 2 0 7 0;
 #X connect 3 0 0 0;
@@ -22,3 +23,4 @@
 #X connect 8 0 0 0;
 #X connect 9 0 0 0;
 #X connect 10 0 0 0;
+#X connect 11 0 4 0;
