@@ -277,11 +277,11 @@ void loop() {
   }
 
   if(!bundleIN.hasError()) {
-    //bundleOUT.add("/noerror/size").add(bundleIN.size());
     if (bundleIN.size() > 0) {
       bundleIN.route("/leds", routeLeds);
       LEDS.show();
     }
+    bundleOUT.add("/leds");
   }
   bundleIN.empty();
   
