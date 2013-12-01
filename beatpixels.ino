@@ -256,10 +256,13 @@ void setup() {
   // set serial configuration
   // use baud rate as high as you can reliably run on your platform
   SLIPSerial.begin(115200);
-#if ARDUINO >= 100
-  while(!Serial)
-    ;   // Leonardo bug
-#endif
+
+  bundleOUT.add("/setup");
+  // send the outgoing message
+  SLIPSerial.beginPacket();
+  bundleOUT.send(SLIPSerial);
+  SLIPSerial.endPacket();
+  bundleOUT.empty();
 }
 
 void loop() {
@@ -281,7 +284,7 @@ void loop() {
       bundleIN.route("/leds", routeLeds);
       LEDS.show();
     }
-    bundleOUT.add("/leds");
+    bundleOUT.add("/loop");
   }
   bundleIN.empty();
   
