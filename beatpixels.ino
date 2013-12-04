@@ -49,6 +49,11 @@ void setRGB(int stripNum, CRGBS &colors)
   }
 }
 
+void setRGB(int stripNum, CRGB color, int i)
+{
+  leds[strips[stripNum].start + i] = color;
+}
+
 void getRGB(OSCMessage &msg, CRGBS &colors)
 {
   /* get rgb colors */
@@ -91,6 +96,11 @@ void setHSV(int stripNum, CHSVS &colors)
   {
     leds[px] = colors.vals[px % colors.len];
   }
+}
+
+void setHSV(int stripNum, CHSV color, int i)
+{
+  leds[strips[stripNum].start + i] = color;
 }
 
 void getHSV(OSCMessage &msg, CHSVS &colors)
@@ -238,6 +248,35 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       //bundleOUT.add("/blue");
     }
     return;
+  }
+
+  int oneOffset = msg.match("/one/*", offset);
+  if (oneOffset)
+  {
+    int startOne = msg.match("/one", offset);
+    offset += allOffset;
+    int oneCharsLen =  stripOffset - startStrip;
+    
+    char oneChars [stripCharsLen];
+    strncpy(oneChars, address + startOne + 1, oneCharsLen);
+    oneChars[oneCharsLen] = '\0';
+    
+    if (msg.fullMatch("/rgb", offset))
+    { 
+      CRGB colors = NULL;
+      getRGB(msg, color);
+      setRGB(stripNum, color, atoi(oneChars));
+    }
+    else if (msg.fullMatch("/hsv", offset))
+    {
+      // WTF!?!?!?
+      if (msg.getInt(2) == 9058) {
+        return;
+      }
+      CHSV colors = NULL;
+      getHSV(msg, color);
+      setHSV(stripNum, color, atoi(oneChars));
+    }
   }
 
 }
