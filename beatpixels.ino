@@ -40,7 +40,7 @@ typedef struct {
 /* set RGB colors */
 void setRGB(int stripNum, CRGB &color, int px)
 {
-  int i = (((px - strips[stripNum].start) % strips[stripNum].length) + strips[stripNum].start);
+  int i = ((px % strips[stripNum].length) + strips[stripNum].start);
   leds[i] = color;
 }
 
@@ -56,8 +56,11 @@ void setRGB(int stripNum, CRGBS &colors)
 
 void setRGB(int stripNum, CRGBS &colors, int from, int to)
 {
-  if (to > strips[stripNum].length) return;
-
+  if ((to - from) > strips[stripNum].length)
+  {
+     setRGB(stripNum, colors);
+     return;
+  }
   for (int px = strips[stripNum].start + from;
        px < (strips[stripNum].start + to);
        px++)
@@ -101,7 +104,7 @@ typedef struct {
 
 void setHSV(int stripNum, CHSV &color, int px)
 {
-  int i = (((px - strips[stripNum].start) % strips[stripNum].length) + strips[stripNum].start);
+  int i = ((px % strips[stripNum].length) + strips[stripNum].start);
   leds[i] = color;
 }
 
@@ -118,8 +121,11 @@ void setHSV(int stripNum, CHSVS &colors)
 
 void setHSV(int stripNum, CHSVS &colors, int from, int to)
 {
-  if (to > strips[stripNum].length) return;
-
+  if ((to - from) > strips[stripNum].length)
+  {
+     setHSV(stripNum, colors);
+     return;
+  }
   for (int px = strips[stripNum].start + from;
        px < (strips[stripNum].start + to);
        px++)
