@@ -44,14 +44,26 @@ void setRGB(int stripNum, CRGBS &colors)
        px < (strips[stripNum].start + strips[stripNum].length);
        px++)
   {
-    leds[px] = colors.vals[px % colors.len];
+    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+  }
+}
+
+void setRGB(int stripNum, CRGBS &colors, int from, int to)
+{
+  if (to > strips[stripNum].length) return;
+
+  for (int px = strips[stripNum].start + from;
+       px < (strips[stripNum].start + to);
+       px++)
+  {
+    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
   }
 }
 
 void setRGB(int stripNum, CRGB color, int i)
 {
   int px = strips[stripNum].start + i;
-  leds[px] = color;
+  leds[px % strips[stripNum].length] = color;
 }
 
 void getRGB(OSCMessage &msg, CRGBS &colors)
@@ -94,14 +106,26 @@ void setHSV(int stripNum, CHSVS &colors)
        px < (strips[stripNum].start + strips[stripNum].length);
        px++)
   {
-    leds[px] = colors.vals[px % colors.len];
+    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+  }
+}
+
+void setHSV(int stripNum, CHSVS &colors, int from, int to)
+{
+  if (to > strips[stripNum].length) return;
+
+  for (int px = strips[stripNum].start + from;
+       px < (strips[stripNum].start + to);
+       px++)
+  {
+    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
   }
 }
 
 void setHSV(int stripNum, CHSV color, int i)
 {
   int px = strips[stripNum].start + i;
-  leds[px] = color;
+  leds[px % strips[stripNum].length] = color;
 }
 
 void getHSV(OSCMessage &msg, CHSVS &colors)
@@ -180,13 +204,13 @@ void setRainbow(int stripNum, OSCMessage &msg)
 void routeLeds(OSCMessage &msg, int ledsOffset)
 {
   char address [30];
-  int addressLen = msg.getAddress(address, ledsOffset);
+  byte addressLen = msg.getAddress(address, ledsOffset);
   //bundleOUT.add("/leds").add(address).add(addressLen);
   
   /* get strip number */
-  int startStrip = msg.match("/strip", ledsOffset);
-  int stripOffset = msg.match("/strip/*", ledsOffset);
-  int stripCharsLen =  stripOffset - startStrip;
+  byte startStrip = msg.match("/strip", ledsOffset);
+  byte stripOffset = msg.match("/strip/*", ledsOffset);
+  byte stripCharsLen =  stripOffset - startStrip;
   
   char stripChars [stripCharsLen];
   strncpy(stripChars, address + startStrip + 1, stripCharsLen);
@@ -198,11 +222,11 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
   
   /* get whether all, range, or single pixels */
   
-  int offset = ledsOffset + stripOffset;
+  byte offset = ledsOffset + stripOffset;
   
-  int allOffset = msg.match("/all", offset);
-  if (allOffset)
+  if (msg.match("/all", offset))
   {
+    byte allOffset = msg.match("/all", offset);
     offset += allOffset;
     
     if (msg.fullMatch("/rgb", offset))
@@ -251,12 +275,12 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
     return;
   }
 
-  int startOne = msg.match("/one", offset);
-  if (startOne)
+  if (msg.match("/one", offset))
   {
-    int oneOffset = msg.match("/one/*", offset);
+    byte startOne = msg.match("/one", offset);
+    byte oneOffset = msg.match("/one/*", offset);
     
-    int oneCharsLen =  oneOffset - startOne - 1;
+    byte oneCharsLen =  oneOffset - startOne - 1;
     
     char oneChars [oneCharsLen];
     strncpy(oneChars, address + stripOffset + startOne + 1, oneCharsLen);
@@ -264,7 +288,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
 
     int oneIndex = atoi(oneChars);
     
-    bundleOUT.add("/one").add(oneChars).add(oneIndex);
+    //bundleOUT.add("/one").add(oneChars).add(oneIndex);
     
     offset += oneOffset;
     
@@ -286,6 +310,54 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       CHSV color = colors.vals[0];
       setHSV(stripNum, color, oneIndex);
     }
+    return;
+  }
+
+  if (msg.match("/from", offset))
+  {
+    byte startFrom = msg.match("/from", offset);
+    byte fromOffset = msg.match("/from/*", offset);
+    
+    byte fromCharsLen =  fromOffset - startFrom - 1;
+    
+    char fromChars [fromCharsLen];
+    strncpy(fromChars, address + stripOffset + startFrom + 1, fromCharsLen);
+    fromChars[fromCharsLen] = '\0';
+
+    int fromIndex = atoi(fromChars);
+    
+    offset += fromOffset;
+
+    byte startTo = msg.match("/to", offset);
+    byte toOffset = msg.match("/to/*", offset);
+    
+    byte toCharsLen =  toOffset - startTo - 1;
+    
+    char toChars [toCharsLen];
+    strncpy(toChars, address + stripOffset + fromOffset + startTo + 1, toCharsLen);
+    toChars[toCharsLen] = '\0';
+
+    int toIndex = atoi(toChars);
+
+    offset += toOffset;
+    
+    if (msg.fullMatch("/rgb", offset))
+    { 
+      CRGBS colors = { NULL, 0 };
+      getRGB(msg, colors);
+      setRGB(stripNum, colors, fromIndex, toIndex);
+    }
+    else if (msg.fullMatch("/hsv", offset))
+    {
+      // WTF!?!?!?
+      if (msg.getInt(2) == 9058) {
+        return;
+      }
+      CHSVS colors = { NULL, 0 };
+      getHSV(msg, colors);
+      setHSV(stripNum, colors, fromIndex, toIndex);
+    }
+    return;
   }
 
 }

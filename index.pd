@@ -1,4 +1,4 @@
-#N canvas 496 232 764 457 10;
+#N canvas 488 224 764 457 10;
 #X declare -lib mrpeach;
 #X declare -lib mrpeach;
 #X obj 153 27 input;
@@ -6,20 +6,24 @@
 #X obj 154 311 output;
 #X obj 54 294 manualEffect;
 #X obj 154 244 stripeEffect;
-#X obj 492 211 vradio 15 1 0 4 empty empty select 20 7 0 8 -262144
+#X obj 493 211 vradio 15 1 0 4 empty empty select 20 7 0 8 -262144
 -1 -1 0;
-#X obj 154 271 mux 1 2;
-#X obj 173 220 singleEffect;
-#X msg 242 53 256;
-#X text 274 52 num leds;
-#X obj 242 26 loadbang;
+#X obj 171 220 singleEffect;
+#X msg 239 54 256;
+#X text 271 53 num leds;
+#X obj 239 27 loadbang;
+#X obj 188 192 rangeEffect;
+#X obj 154 271 mux 1 2 3;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
-#X connect 1 0 7 0;
+#X connect 1 0 6 0;
+#X connect 1 0 10 0;
 #X connect 3 0 2 0;
-#X connect 4 0 6 0;
-#X connect 5 0 6 2;
-#X connect 6 0 2 0;
+#X connect 4 0 11 0;
+#X connect 5 0 11 3;
+#X connect 6 0 11 1;
 #X connect 7 0 6 1;
-#X connect 8 0 7 1;
-#X connect 10 0 8 0;
+#X connect 7 0 10 1;
+#X connect 9 0 7 0;
+#X connect 10 0 11 2;
+#X connect 11 0 2 0;
