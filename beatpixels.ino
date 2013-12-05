@@ -26,9 +26,8 @@ typedef struct {
   int length;
 } Strip;
 
-Strip strips [2] = {
-  { 0, 128 },
-  { 128, 128 }
+Strip strips [1] = {
+  { 0, 255 }
 };
 
 /* RGB utilities */
@@ -51,7 +50,8 @@ void setRGB(int stripNum, CRGBS &colors)
 
 void setRGB(int stripNum, CRGB color, int i)
 {
-  leds[strips[stripNum].start + i] = color;
+  int px = strips[stripNum].start + i;
+  leds[px] = color;
 }
 
 void getRGB(OSCMessage &msg, CRGBS &colors)
@@ -100,7 +100,8 @@ void setHSV(int stripNum, CHSVS &colors)
 
 void setHSV(int stripNum, CHSV color, int i)
 {
-  leds[strips[stripNum].start + i] = color;
+  int px = strips[stripNum].start + i;
+  leds[px] = color;
 }
 
 void getHSV(OSCMessage &msg, CHSVS &colors)
@@ -250,22 +251,29 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
     return;
   }
 
-  int oneOffset = msg.match("/one/*", offset);
-  if (oneOffset)
+  int startOne = msg.match("/one", offset);
+  if (startOne)
   {
-    int startOne = msg.match("/one", offset);
-    offset += allOffset;
-    int oneCharsLen =  stripOffset - startStrip;
+    int oneOffset = msg.match("/one/*", offset);
     
-    char oneChars [stripCharsLen];
-    strncpy(oneChars, address + startOne + 1, oneCharsLen);
+    int oneCharsLen =  oneOffset - startOne - 1;
+    
+    char oneChars [oneCharsLen];
+    strncpy(oneChars, address + stripOffset + startOne + 1, oneCharsLen);
     oneChars[oneCharsLen] = '\0';
+
+    int oneIndex = atoi(oneChars);
+    
+    bundleOUT.add("/one").add(oneChars).add(oneIndex);
+    
+    offset += oneOffset;
     
     if (msg.fullMatch("/rgb", offset))
     { 
-      CRGB colors = NULL;
-      getRGB(msg, color);
-      setRGB(stripNum, color, atoi(oneChars));
+      CRGBS colors = { NULL, 0 };
+      getRGB(msg, colors);
+      CRGB color = colors.vals[0];
+      setRGB(stripNum, color, oneIndex);
     }
     else if (msg.fullMatch("/hsv", offset))
     {
@@ -273,9 +281,10 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       if (msg.getInt(2) == 9058) {
         return;
       }
-      CHSV colors = NULL;
-      getHSV(msg, color);
-      setHSV(stripNum, color, atoi(oneChars));
+      CHSVS colors = { NULL, 0 };
+      getHSV(msg, colors);
+      CHSV color = colors.vals[0];
+      setHSV(stripNum, color, oneIndex);
     }
   }
 
@@ -333,3 +342,5 @@ void loop() {
   SLIPSerial.endPacket();
   bundleOUT.empty();
 }
+
+/* */
