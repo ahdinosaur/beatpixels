@@ -38,13 +38,19 @@ typedef struct {
 } CRGBS;
 
 /* set RGB colors */
+void setRGB(int stripNum, CRGB &color, int px)
+{
+  int i = (((px - strips[stripNum].start) % strips[stripNum].length) + strips[stripNum].start);
+  leds[i] = color;
+}
+
 void setRGB(int stripNum, CRGBS &colors)
 {
   for (int px = strips[stripNum].start;
        px < (strips[stripNum].start + strips[stripNum].length);
        px++)
   {
-    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+    setRGB(stripNum, colors.vals[px % colors.len], px);
   }
 }
 
@@ -56,14 +62,8 @@ void setRGB(int stripNum, CRGBS &colors, int from, int to)
        px < (strips[stripNum].start + to);
        px++)
   {
-    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+    setRGB(stripNum, colors.vals[px % colors.len], px);
   }
-}
-
-void setRGB(int stripNum, CRGB color, int i)
-{
-  int px = strips[stripNum].start + i;
-  leds[px % strips[stripNum].length] = color;
 }
 
 void getRGB(OSCMessage &msg, CRGBS &colors)
@@ -99,6 +99,12 @@ typedef struct {
   int len;
 } CHSVS;
 
+void setHSV(int stripNum, CHSV &color, int px)
+{
+  int i = (((px - strips[stripNum].start) % strips[stripNum].length) + strips[stripNum].start);
+  leds[i] = color;
+}
+
 /* set HSV colors */
 void setHSV(int stripNum, CHSVS &colors)
 {
@@ -106,7 +112,7 @@ void setHSV(int stripNum, CHSVS &colors)
        px < (strips[stripNum].start + strips[stripNum].length);
        px++)
   {
-    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+    setHSV(stripNum, colors.vals[px % colors.len], px);
   }
 }
 
@@ -118,14 +124,8 @@ void setHSV(int stripNum, CHSVS &colors, int from, int to)
        px < (strips[stripNum].start + to);
        px++)
   {
-    leds[px % strips[stripNum].length] = colors.vals[px % colors.len];
+    setHSV(stripNum, colors.vals[px % colors.len], px);
   }
-}
-
-void setHSV(int stripNum, CHSV color, int i)
-{
-  int px = strips[stripNum].start + i;
-  leds[px % strips[stripNum].length] = color;
 }
 
 void getHSV(OSCMessage &msg, CHSVS &colors)
@@ -298,6 +298,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       getRGB(msg, colors);
       CRGB color = colors.vals[0];
       setRGB(stripNum, color, oneIndex);
+      free(colors.vals);
     }
     else if (msg.fullMatch("/hsv", offset))
     {
@@ -309,6 +310,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       getHSV(msg, colors);
       CHSV color = colors.vals[0];
       setHSV(stripNum, color, oneIndex);
+      free(colors.vals);
     }
     return;
   }
@@ -346,6 +348,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       CRGBS colors = { NULL, 0 };
       getRGB(msg, colors);
       setRGB(stripNum, colors, fromIndex, toIndex);
+      free(colors.vals);
     }
     else if (msg.fullMatch("/hsv", offset))
     {
@@ -356,6 +359,7 @@ void routeLeds(OSCMessage &msg, int ledsOffset)
       CHSVS colors = { NULL, 0 };
       getHSV(msg, colors);
       setHSV(stripNum, colors, fromIndex, toIndex);
+      free(colors.vals);
     }
     return;
   }
