@@ -1,4 +1,4 @@
-#N canvas 226 122 926 594 10;
+#N canvas 224 120 926 594 10;
 #X obj 26 572 outlet;
 #X msg -53 479 ];
 #X msg -18 479 [;
@@ -23,11 +23,12 @@
 #X text 159 136 input is beat velocity;
 #X text -65 287 input is (hsv \, hsv \, hsv);
 #X obj 183 224 t f b;
-#X obj 183 316 min 254;
-#X obj 183 280 * 2.4;
+#X obj 183 316 min;
+#X obj 183 279 * 3;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 4 0 10 1;
+#X connect 4 0 23 1;
 #X connect 7 0 10 0;
 #X connect 9 0 0 0;
 #X connect 10 0 11 1;

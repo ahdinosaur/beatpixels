@@ -12,7 +12,7 @@ SLIPEncodedUSBSerial SLIPSerial( thisBoardsSerialUSB );
  SLIPEncodedSerial SLIPSerial(Serial);
 #endif
 
-#define NUM_STRIPS 8
+#define NUM_STRIPS 15
 #define LEDS_PER_STRIP 32
 #define NUM_LEDS (NUM_STRIPS * LEDS_PER_STRIP)
 
@@ -27,7 +27,7 @@ typedef struct {
 } Strip;
 
 Strip strips [1] = {
-  { 0, 255 }
+  { 0, 480 }
 };
 
 /* RGB utilities */
