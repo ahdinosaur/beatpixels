@@ -1,4 +1,4 @@
-#N canvas 480 216 764 457 10;
+#N canvas 525 203 764 457 10;
 #X declare -lib mrpeach;
 #X declare -lib mrpeach;
 #X obj 153 27 input;

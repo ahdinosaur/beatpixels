@@ -1,4 +1,4 @@
-#N canvas 224 120 926 594 10;
+#N canvas 222 118 926 594 10;
 #X obj 26 572 outlet;
 #X msg -53 479 ];
 #X msg -18 479 [;
